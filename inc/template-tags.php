@@ -44,7 +44,7 @@ if ( !function_exists( 'independent_publisher_content_nav' ) ) :
 			<?php if ( is_single() ) : // navigation links for single posts ?>
 
 				<?php wp_pagenavi(); ?>
-
+				
 				<?php previous_post_link( '<div class="nav-previous"><button>%link</button></div>', '<span class="meta-nav">' . _x( '&larr;', 'Previous post link', 'independent-publisher' ) . '</span> %title' ); ?>
 				<?php next_post_link( '<div class="nav-next"><button>%link</button></div>', '%title <span class="meta-nav">' . _x( '&rarr;', 'Next post link', 'independent-publisher' ) . '</span>' ); ?>
 
@@ -90,7 +90,7 @@ if ( !function_exists( 'independent_publisher_comment' ) ) :
 			<footer>
 				<div class="comment-author vcard">
 					<?php echo get_avatar( $comment, 48 ); ?>
-					<?php printf( '<cite class="fn">%s</cite>', get_comment_author_link() ); ?>
+					<?php printf( sprintf( '<cite class="fn">%s</cite>', get_comment_author_link() ) ); ?>
 					<?php if ( $comment->comment_approved == '0' ) : ?>
 						<?php $comment_content_class = "unapproved"; ?>
 						<em><?php _e( ' - Your comment is awaiting moderation.', 'independent-publisher' ); ?></em>
@@ -488,7 +488,7 @@ if ( !function_exists( 'independent_publisher_posted_author_card' ) ) :
 				<img class="no-grav" src="<?php echo esc_url( get_header_image() ); ?>" height="<?php echo absint( get_custom_header()->height ); ?>" width="<?php echo absint( get_custom_header()->width ); ?>" alt="<?php echo esc_attr( get_bloginfo( 'name', 'display' ) ); ?>" />
 			</a>
 		<?php else: ?>
-			<a class="site-logo" href="<?php echo get_author_posts_url( get_the_author_meta( 'ID', $post_author_id ) ); ?>">
+			<a class="site-logo" href="<?php echo esc_url( home_url( '/' ) ); ?>">
 				<?php echo get_avatar( get_the_author_meta( 'ID', $post_author_id ), 100 ); ?>
 			</a>
 		<?php endif; ?>
@@ -673,7 +673,13 @@ if ( !function_exists( 'independent_publisher_search_stats' ) ):
 		$current_page_num = ( get_query_var( 'paged' ) ) ? get_query_var( 'paged' ) : 1;
 		$pagination_info  = '';
 
-		$pagination_info = sprintf( __( 'this is page <strong>%1$s</strong> of <strong>%2$s</strong>', 'independent-publisher' ), number_format_i18n( $current_page_num ), number_format_i18n( $total_pages ) );
+		/**
+		 * Only show pagination info when there is more than 1 page
+		 */
+		if ( $total_pages > 1 ) {
+			$pagination_info = sprintf( __( ' this is page <strong>%1$s</strong> of <strong>%2$s</strong>', 'independent-publisher' ), number_format_i18n( $current_page_num ), number_format_i18n( $total_pages ) );
+		}
+
 		$stats_text = sprintf( _n( 'Found one search result for <strong>%2$s</strong>.', 'Found %1$s search results for <strong>%2$s</strong> (%3$s).', $total, 'independent-publisher' ), number_format_i18n( $total ), get_search_query(), $pagination_info );
 
 		return wpautop( $stats_text );
@@ -698,7 +704,12 @@ if ( !function_exists( 'independent_publisher_taxonomy_archive_stats' ) ):
 		$pagination_info  = '';
 		$stats_text       = '';
 
-		$pagination_info = sprintf( __( 'this is page <strong>%1$s</strong> of <strong>%2$s</strong>', 'independent-publisher' ), number_format_i18n( $current_page_num ), number_format_i18n( $total_pages ) );
+		/**
+		 * Only show pagination info when there is more than 1 page
+		 */
+		if ( $total_pages > 1 ) {
+			$pagination_info = sprintf( __( ' this is page <strong>%1$s</strong> of <strong>%2$s</strong>', 'independent-publisher' ), number_format_i18n( $current_page_num ), number_format_i18n( $total_pages ) );
+		}
 
 		if ( $taxonomy === 'category' ) {
 			$stats_text = sprintf( _n( 'There is one post filed in <strong>%2$s</strong>.', 'There are %1$s posts filed in <strong>%2$s</strong> (%3$s).', $total, 'independent-publisher' ), number_format_i18n( $total ), single_term_title( '', false ), $pagination_info );
@@ -722,7 +733,12 @@ if ( !function_exists( 'independent_publisher_date_archive_description' ) ):
 		$pagination_info   = '';
 		$date_archive_meta = '';
 
-		$pagination_info = sprintf( __( 'this is page <strong>%1$s</strong> of <strong>%2$s</strong>', 'independent-publisher' ), number_format_i18n( $current_page_num ), number_format_i18n( $total_pages ) );
+		/**
+		 * Only show pagination info when there is more than 1 page
+		 */
+		if ( $total_pages > 1 ) {
+			$pagination_info = sprintf( __( ' this is page <strong>%1$s</strong> of <strong>%2$s</strong>', 'independent-publisher' ), number_format_i18n( $current_page_num ), number_format_i18n( $total_pages ) );
+		}
 
 		/**
 		 * Only proceed if we're on the first page and the description has not been overridden via independent_publisher_custom_date_archive_meta
@@ -831,21 +847,5 @@ if ( !function_exists( 'independent_publisher_show_excerpt' ) ):
 		} else {
 			return FALSE;
 		}
-	}
-endif;
-
-if ( ! function_exists( 'independent_publisher_show_related_tags' ) ) :
-	/**
-	 * Display a list of all other tags at the bottom of each post.
-	 */
-	function independent_publisher_show_related_tags() {
-		if ( get_the_tag_list() ) :
-
-			$tag_list_title = apply_filters( 'independent_publisher_tag_list_title', __( 'Related Content by Tag', 'independent-publisher' ) );
-			$tag_list = (string) get_the_tag_list( '<ul class="taglist"><li class="taglist-title">' . $tag_list_title . '</li><li>', '</li><li>', '</li></ul>' );
-
-			printf( '<div id="taglist">%s</div>', $tag_list );
-
-		endif;
 	}
 endif;
